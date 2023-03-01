@@ -14,7 +14,7 @@ INSERT INTO dbo.Customers
 VALUES
 (   N'Daniel''s Bakery',  -- Name - nvarchar(70)
     N'3184582814',  -- PhoneNumber - nvarchar(10)
-	'123 Chocolate Ln.',
+	'123 Fake Ln.',
 	NULL,
 	'Shreveport',
 	'Louisiana',
