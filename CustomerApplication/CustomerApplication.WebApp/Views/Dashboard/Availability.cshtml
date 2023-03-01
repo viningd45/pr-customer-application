@@ -179,6 +179,7 @@
                     dataType: "json",
                     success: function (result) {
                         that.fetchCustomerHours()
+                        that.resetCustomerHoursModel()
                     },
                     error: function (err) {
                         console.log(err)
