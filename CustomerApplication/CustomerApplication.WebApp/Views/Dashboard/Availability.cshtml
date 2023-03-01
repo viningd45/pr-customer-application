@@ -218,7 +218,6 @@
                 });
             },
             saveCustomerHours() {
-                console.log(this.customerHoursModel)
                 var method = this.customerHoursModel.id > 0 ? 'PUT' : 'POST'
                 this.customerHoursModel.customerId = this.selectedCustomerId
                 var that = this
@@ -271,8 +270,9 @@
         mounted() {
             this.fetchCustomers()
             this.selectedCustomerId = @Model.CustomerIdString
-                if (this.selectedCustomerId)
+            if (this.selectedCustomerId) {
                 this.fetchCustomerHours()
+            }
         }
     })
 </script>
