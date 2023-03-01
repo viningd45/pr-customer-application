@@ -38,7 +38,7 @@ public class CustomerHoursController : ControllerBase
         _logger.LogWarning("Validation responses: {@errors}", validation.Errors);
 
         if (!validation.IsValid) return BadRequest(validation.Errors);
-        return BadRequest("Customer opening creation failed. Please attempt the request again. If the issue persists please contact support.");
+        return BadRequest(new ResponseMessageRequest("Customer opening creation failed. Please attempt the request again. If the issue persists please contact support."));
     }
 
     [HttpPut]
@@ -54,7 +54,7 @@ public class CustomerHoursController : ControllerBase
         _logger.LogWarning("Validation responses: {@errors}", validation.Errors);
 
         if (!validation.IsValid) return BadRequest(validation.Errors);
-        return BadRequest("Customer opening update failed. Please attempt the request again. If the issue persists please contact support.");
+        return BadRequest(new ResponseMessageRequest("Customer opening update failed. Please attempt the request again. If the issue persists please contact support."));
     }
 
     [HttpDelete]
@@ -69,7 +69,7 @@ public class CustomerHoursController : ControllerBase
 
         _logger.LogWarning("Customer hours with id {id} could not be deleted", customerOpeningId);
 
-        return BadRequest("Customer opening not be deleted. Please verify that the provided customer opening ID is correct");
+        return BadRequest(new ResponseMessageRequest("Customer opening not be deleted. Please verify that the provided customer opening ID is correct"));
     }
 
     [HttpDelete]
@@ -84,6 +84,6 @@ public class CustomerHoursController : ControllerBase
 
         _logger.LogWarning("Customer hours for customer {id} were not all deleted", customerId);
 
-        return BadRequest("Failed to delete all customer openings. Please try the request again and if the issue persists contact support. ");
+        return BadRequest(new ResponseMessageRequest("Failed to delete all customer openings. Please try the request again and if the issue persists contact support. "));
     }
 }
