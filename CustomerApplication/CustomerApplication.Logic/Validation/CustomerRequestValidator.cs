@@ -10,7 +10,7 @@ public class CustomerRequestValidator : AbstractValidator<CustomerRequest>
     {
         RuleLevelCascadeMode = CascadeMode.Stop;
         RuleFor(customer => customer.Name).NotNull().NotEmpty().WithMessage("Customer name is required").MaximumLength(70).WithMessage("Name cannot be more than 70 characters"); ;
-        RuleFor(customer => customer.PhoneNumber).NotNull().NotEmpty().WithMessage("Customer phone number is required").Length(14).WithMessage("A valid 10 digit phone number is required").Custom((value, context) =>
+        RuleFor(customer => customer.PhoneNumber).NotNull().NotEmpty().WithMessage("Customer phone number is required").MinimumLength(10).MaximumLength(14).WithMessage("A valid 10 digit phone number is required").Custom((value, context) =>
         {
             string parsed = value.GetNumbers();
             if (parsed.Length != 10) context.AddFailure("Phone number may only contain numbers");

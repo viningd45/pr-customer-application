@@ -19,7 +19,7 @@ public class CustomerRequestValidatorTests
     public void ShouldHaveError_When_PhoneNumberHasIncorrectLength()
     {
         CustomerRequest customerRequest= new();
-        customerRequest.PhoneNumber = "3181231234";
+        customerRequest.PhoneNumber = "318123123412";
 
         var result = validator.TestValidate(customerRequest);
         result.ShouldHaveValidationErrorFor(customer => customer.PhoneNumber);
@@ -35,11 +35,12 @@ public class CustomerRequestValidatorTests
         result.ShouldHaveValidationErrorFor(customer => customer.PhoneNumber);
     }
 
-    [Test]
-    public void ShouldNotHaveError_When_PhoneNumberHasCorrectFormat()
+    [TestCase("(318) 123-1234")]
+    [TestCase("3181231234")]
+    public void ShouldNotHaveError_When_PhoneNumberHasCorrectFormat(string phone)
     {
         CustomerRequest customerRequest = new();
-        customerRequest.PhoneNumber = "(318) 123-1234";
+        customerRequest.PhoneNumber = phone;
 
         var result = validator.TestValidate(customerRequest);
         result.ShouldNotHaveValidationErrorFor(customer => customer.PhoneNumber);
