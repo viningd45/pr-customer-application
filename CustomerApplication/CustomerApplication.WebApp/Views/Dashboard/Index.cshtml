@@ -202,7 +202,6 @@
                     url: urlString,
                     dataType: "json",
                     success: function (result) {
-                        console.log(result)
                         that.fetchCustomers()
                         that.closeCustomerFormDialog()
                     },
@@ -238,7 +237,6 @@
                     dataType: 'json',
                     data: JSON.stringify(that.customerModel),
                     success: function (result) {
-                        console.log(result)
                         that.fetchCustomers()
                         that.closeCustomerFormDialog()
                     },
@@ -273,8 +271,6 @@
             handleDrawerClose() {
                 this.customerHours = []
             }
-        },
-        computed: {
         },
         watch: {
             'customerModel.phoneNumber'(next, prev) {
