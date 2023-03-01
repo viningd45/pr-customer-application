@@ -11,7 +11,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\CustomerLibrary.Helpers\CustomerApplication.Helpers.csproj" />
+    <ProjectReference Include="..\CustomerApplication.Helpers\CustomerApplication.Helpers.csproj" />
   </ItemGroup>
 
 </Project>
