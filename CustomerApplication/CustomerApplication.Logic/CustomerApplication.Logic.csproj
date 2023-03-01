@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\CustomerApplication.DataAccess\CustomerApplication.DataAccess.csproj" />
+    <ProjectReference Include="..\CustomerApplication.Helpers\CustomerApplication.Helpers.csproj" />
+    <ProjectReference Include="..\CustomerApplication.Models\CustomerApplication.Models.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="FluentValidation" Version="11.5.1" />
+  </ItemGroup>
+
+</Project>
