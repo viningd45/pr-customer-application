@@ -1,0 +1,303 @@
+﻿@model DashboardIndexViewModel
+
+<div id="customerIndex">
+    <div id="mainDashboard" class="padding-all-5px">
+        <el-row>
+            <el-col :span="2">
+                <el-button type="primary" icon="el-icon-edit" v-on:click="openCustomerFormDialog">Add Customer</el-button>
+            </el-col>
+            <el-col :span="2">
+                <el-button type="primary" icon="el-icon-refresh" v-on:click="fetchCustomers">Refresh</el-button>
+            </el-col>
+        </el-row>
+        <el-table :data="customers"
+                  class="width-100"
+                  v-on:row-click="handleRowClick"
+                  v-loading="customersLoading">
+            <el-table-column prop="name"
+                             label="Customer Name"
+                             width="180">
+            </el-table-column>
+            <el-table-column prop="phoneNumberFormatted"
+                             label="Phone">
+            </el-table-column>
+            <el-table-column prop="streetAddress"
+                             label="Address"
+                             width="400">
+            </el-table-column>
+            <el-table-column prop="city"
+                             label="City">
+            </el-table-column>
+            <el-table-column prop="state"
+                             label="State">
+            </el-table-column>
+            <el-table-column prop="zipCodeFormatted"
+                             label="Zip">
+            </el-table-column>
+            <el-table-column :index="6" label="Operating Hours">
+                <template slot-scope="scope">
+                    <el-button v-on:click="fetchCustomerHours(scope.row)">View</el-button>
+                    <el-button v-on:click="navigateToAvailabilityView(scope.row.id)">Edit Hours</el-button>
+                </template>
+            </el-table-column>
+        </el-table>
+    </div>
+    <el-drawer :title="hoursTitle"
+               :visible.sync="hoursDrawerVisible"
+               direction="rtl"
+               v-on:closed="handleDrawerClose"
+               custom-class="drawerStyle">
+        <el-card>
+            <div v-if="customerHours.length > 0">
+                <div v-for="item in customerHours" :key="item.id">
+                    <icon class="el-icon-caret-right"> {{ item.dayOfWeekText }}: {{ item.fullHoursText }}</icon>
+                </div>
+            </div>
+            <div v-else>
+                <h5>No open hours have been recorded</h5>
+            </div>
+        </el-card>
+    </el-drawer>
+    <el-dialog :title="dialogTitle"
+               :visible.sync="customerFormVisible"
+               width="60%"
+               v-on:closed="handleClose"
+               v-on:open="handleOpen">
+        <el-form ref="customerForm" label-width="120px">
+            <el-row>
+                <el-col :span="12">
+                    <el-form-item label="Name">
+                        <el-input v-model="customerModel.name"></el-input>
+                    </el-form-item>
+                </el-col>
+                <el-col :push="2" :span="9">
+                    <el-form-item label="Phone Number">
+                        <el-input v-model="customerModel.phoneNumber"></el-input>
+                    </el-form-item>
+                </el-col>
+            </el-row>
+            <el-row>
+                <el-col :span="17">
+                    <el-form-item label="Street Address">
+                        <el-input v-model="customerModel.addressLineOne"></el-input>
+                    </el-form-item>
+                </el-col>
+                <el-col :span="6">
+                    <el-form-item label="Apt/Suite">
+                        <el-input v-model="customerModel.addressLineTwo"></el-input>
+                    </el-form-item>
+                </el-col>
+            </el-row>
+            <el-row>
+                <el-col :span="8">
+                    <el-form-item label="City">
+                        <el-input v-model="customerModel.city"></el-input>
+                    </el-form-item>
+                </el-col>
+                <el-col :span="7">
+                    <el-form-item label="State">
+                        <el-select v-model="customerModel.state" placeholder="Select">
+                            <el-option v-for="state in stateAbbreviations"
+                                       :key="state.abbreviation"
+                                       :label="state.name"
+                                       :value="state.abbreviation">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
+                </el-col>
+                <el-col :span="8">
+                    <el-form-item label="Zip Code">
+                        <el-input v-model="customerModel.zipCode"></el-input>
+                    </el-form-item>
+                </el-col>
+            </el-row>
+        </el-form>
+        <el-row>
+            <el-col :push="customerModel.id > 0 ? 21 : 22">
+                <el-button v-if="customerModel.id > 0" v-on:click="updateCustomer" type="success" icon="el-icon-check" circle></el-button>
+                <el-button v-if="customerModel.id === 0" v-on:click="createCustomer" type="success" icon="el-icon-check" circle></el-button>
+                <el-button v-if="customerModel.id > 0" v-on:click="promptDeleteCustomer" type="danger" icon="el-icon-delete" circle></el-button>
+            </el-col>
+        </el-row>
+    </el-dialog>
+</div>
+
+
+<script type="text/javascript">
+
+    new Vue({
+        el: '#customerIndex',
+        data: {
+            customers: [],
+            customerFormVisible: false,
+            customerModelDefault: @Json.Serialize(Model.Customer),
+            customerModel: {},
+            dialogTitle: '',
+            customerHours: [],
+            hoursTitle: '',
+            hoursDrawerVisible: false,
+            customersLoading: false,
+            stateAbbreviations: getStates()
+        },
+        methods: {
+            fetchCustomers() {
+                this.customersLoading = true
+                var that = this
+                $.ajax({
+                    type: "GET",
+                    url: "/api/customers",
+                    dataType: "json",
+                    success: function (result) {
+                        that.customers = result
+
+                    },
+                    error: function (err) {
+                        console.log(err)
+                        handleErrorResponse(err, "Fetch error", that)
+                    },
+                    complete: function (data) {
+                        that.customersLoading = false
+                    }
+                });
+            },
+            fetchCustomerHours(row) {
+                var that = this
+                this.hoursTitle = `${row.name} Open Hours`
+                var urlText = `/api/customer-hours/${row.id}`
+                $.ajax({
+                    type: "GET",
+                    url: urlText,
+                    dataType: "json",
+                    success: function (result) {
+                        that.customerHours = result
+                        that.hoursDrawerVisible = true
+                    },
+                    error: function (err) {
+                        console.log(err)
+                        handleErrorResponse(err, "Fetch error", that)
+                    }
+                });
+            },
+            promptDeleteCustomer() {
+                this.$confirm(`This will delete ${this.customerModel.name}  from the system. Continue?`, 'Warning', {
+                    confirmButtonText: 'OK',
+                    cancelButtonText: 'Cancel',
+                    type: 'warning'
+                }).then(() => {
+                    this.deleteCustomer();
+                }).catch(() => {
+                    this.$message({
+                        type: 'info',
+                        message: 'Delete canceled'
+                    });
+                });
+            },
+            deleteCustomer: function () {
+                var that = this
+                var urlString = "/api/customers/" + this.customerModel.id
+                $.ajax({
+                    type: "DELETE",
+                    url: urlString,
+                    dataType: "json",
+                    success: function (result) {
+                        console.log(result)
+                        that.fetchCustomers()
+                        that.closeCustomerFormDialog()
+                    },
+                    error: function (err) {
+                        console.log(err)
+                        handleErrorResponse(err, "Deletion error", that)
+                    }
+                });
+            },
+            handleRowClick(row, column, event) {
+                if (column.index !== 6) {
+                    Object.assign(this.customerModel, row)
+                    this.customerModel.phoneNumber = row.phoneNumberFormatted
+                    this.customerModel.zipCode = row.zipCodeFormatted
+                    this.customerFormVisible = true
+                }
+            },
+            updateCustomer() {
+                this.manageCustomerRequest('PUT')
+            },
+            createCustomer() {
+                this.manageCustomerRequest('POST')
+            },
+            manageCustomerRequest(method) {
+                var that = this
+                $.ajax({
+                    type: method,
+                    url: "/api/customers",
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    },
+                    dataType: 'json',
+                    data: JSON.stringify(that.customerModel),
+                    success: function (result) {
+                        console.log(result)
+                        that.fetchCustomers()
+                        that.closeCustomerFormDialog()
+                    },
+                    error: function (err) {
+                        handleErrorResponse(err, 'Saving Error', that)
+                    }
+                });
+            },
+            closeCustomerFormDialog() {
+                this.customerFormVisible = false
+            },
+            openCustomerFormDialog: function () {
+                this.customerFormVisible = true
+            },
+            handleClose() {
+                this.setcustomerModelDefaults()
+            },
+            handleOpen() {
+                if (this.customerModel.id > 0) {
+                    this.dialogTitle = `Editting ${this.customerModel.name}`
+                } else {
+                    this.dialogTitle = 'Add a new customer'
+                }
+            },
+            setcustomerModelDefaults() {
+                this.customerModel = Object.assign({}, this.customerModelDefault)
+            },
+            navigateToAvailabilityView(id) {
+                var url = `/Dashboard/Availability/${id}`
+                window.location.href = url;
+            },
+            handleDrawerClose() {
+                this.customerHours = []
+            }
+        },
+        computed: {
+        },
+        watch: {
+            'customerModel.phoneNumber'(next, prev) {
+                if (next.length == 1 && next.length > prev.length)
+                    this.customerModel.phoneNumber = '(' + this.customerModel.phoneNumber
+                if (next.length == 4 && next.length > prev.length)
+                    this.customerModel.phoneNumber = this.customerModel.phoneNumber + ') '
+                if (next.length == 9 && next.length > prev.length)
+                    this.customerModel.phoneNumber = this.customerModel.phoneNumber + '-'
+            },
+            'customerModel.zipCode'(next, prev) {
+                if (prev && next) {
+                    if (prev.length == 5 && next.length > prev.length)
+                        this.customerModel.zipCode = prev + '-' + next[next.length - 1]
+                }
+            },
+        },
+        mounted() {
+            this.fetchCustomers()
+            this.setcustomerModelDefaults()
+        }
+    })
+</script>
+<style type="text/css">
+    .drawerStyle {
+        background-color: whitesmoke;
+    }
+</style>

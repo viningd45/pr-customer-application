@@ -1,0 +1,53 @@
+﻿@model LayoutViewModel
+
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>CustomerApplication.WebApp</title>
+        <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+        <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+        <link rel="stylesheet" href="~/CustomerApplication.WebApp.styles.css" asp-append-version="true" />
+        <link rel="stylesheet" href="~/css/element-ui.css">
+    </head>
+    <body>
+        <script src="~/js/vue.js"></script>
+        <script src="~/js/element-ui.js"></script>
+        <script src="~/lib/jquery/dist/jquery.min.js"></script>
+        <script src="//unpkg.com/element-ui/lib/umd/locale/en.js"></script>
+        <script src="~/lib/jquery/dist/jquery.min.js"></script>
+        <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="~/js/site.js" asp-append-version="true"></script>
+        <header>
+        </header>
+           <div id="menu">
+                <el-menu :default-active="activeIndex" mode="horizontal" >
+                  <el-menu-item index="1" v-on:click="navigate('/Dashboard/Index')">Dashboard</el-menu-item>
+                  <el-menu-item index="2" v-on:click="navigate('/Dashboard/Availability')">Customer Hours</el-menu-item>
+                  <div class="viewTitle"><h3>@Model.ViewTitle</h3></div>
+                </el-menu>
+            </div>
+            <div>
+                <main class="main" role="main" >
+                    @RenderBody()
+                </main>
+            </div>
+        @await RenderSectionAsync("Scripts", required: false)
+        <script type="text/javascript">
+            
+            ELEMENT.locale(ELEMENT.lang.en)
+            new Vue({
+                el: '#menu',
+                data: {
+                    activeIndex: String(@Model.MenuIndex)
+                },
+                methods: {
+                    navigate(url) {
+                        location.href = url
+                    }
+                }
+            })
+        </script>
+    </body>
+</html>
